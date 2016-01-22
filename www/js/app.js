@@ -8,8 +8,25 @@ agg = angular.module('agg', deps).filter(
     }]
 );
 
+agg.factory('Camera', ['$q', function($q){
+  return {
+    getPicture: function(options){
+      var q = $q.defer();
+
+      navigator.camera.getPicture(function(result){
+        q.resolve(result);
+      }, function(err){
+        q.reject(err);
+      }, options);
+
+      return q.promise;
+    }
+  }
+}]);
+
 //set up route
-agg.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+agg.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $compileProvider) {
+  $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
   $ionicConfigProvider.views.maxCache(5);
   // note that you can also chain configs
   $ionicConfigProvider.backButton.text('返回').icon('ion-chevron-left')
@@ -35,7 +52,7 @@ agg.controller('appController', function($scope, $timeout, $http){
   
 });
 
-agg.controller('petController', function($scope, $http, $ionicModal, $ionicActionSheet, $timeout){
+agg.controller('petController', function($scope, $http, $ionicModal, $ionicActionSheet, $timeout, Camera){
   $scope.showPicSelectActionSheet = function() {
     // Show the action sheet
     var hideSheet = $ionicActionSheet.show({
@@ -52,7 +69,7 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
         switch(index){
           case 0:
             hideSheet();
-            $scope.openCreatePetModal();
+            $scope.getPhoto();
             break;
           case 1:
             hideSheet();
@@ -66,7 +83,17 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
     });
   };
 
-
+  $scope.getPhoto = function(){
+    Camera.getPicture().then(function(imageURI){
+      console.log(imageURI);
+      $scope.lastPhoto = "data:image/jpeg;base64," + imageURI;
+    }, function(err){
+      console.err(err);
+    }, {
+      quality: 75,
+      saveToPhotoAlbum: false
+    });
+  };
 
   $ionicModal.fromTemplateUrl('view/pet/create.html', {
     scope: $scope,
