@@ -69,11 +69,12 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
         switch(index){
           case 0:
             hideSheet();
-            $scope.getPhoto();
+            $scope.getPhotoFromCamera();
             break;
           case 1:
             hideSheet();
-            $scope.openCreatePetModal();
+            $scope.getPhotoFromLibrary();
+            //$scope.openCreatePetModal();
             break;
           default:
             hideSheet();
@@ -83,15 +84,35 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
     });
   };
 
-  $scope.getPhoto = function(){
-    Camera.getPicture().then(function(imageURI){
-      console.log(imageURI);
-      $scope.lastPhoto = "data:image/jpeg;base64," + imageURI;
+   $scope.getPhotoFromCamera = function(){
+    Camera.getPicture({
+      quality: 100,
+      targetWidth: 300,
+      targetHeight: 300,
+      destinationType: navigator.camera.DestinationType.DATA_URI,
+      sourceType: navigator.camera.PictureSourceType.CAMERA,
+      saveToPhotoAlbum: false
+    }).then(function(imageData){
+      console.log(imageData);
+      var imageURI = "data:image/jpeg;base64," + imageData;
+      $("#cameraPhoto").attr("src", imageURI);
     }, function(err){
       console.err(err);
-    }, {
+    });
+  };
+
+  $scope.getPhotoFromLibrary = function(){
+    Camera.getPicture({
       quality: 75,
+      destinationType: navigator.camera.DestinationType.DATA_URI,
+      sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY,
       saveToPhotoAlbum: false
+    }).then(function(imageURI){
+      console.log(imageURI);
+      var imageURI = "data:image/jpeg;base64," + imageData;
+      $("#cameraPhoto").attr("src", imageURI);
+    }, function(err){
+      console.err(err);
     });
   };
 
