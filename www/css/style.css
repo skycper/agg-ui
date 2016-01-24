@@ -1,1 +1,10 @@
 /* Empty. Add your own CSS if you like */
+#petAvator{
+	width: 60px;
+	height: 60px;
+	border-radius: 60px;
+}
+
+#createPetBirthday{
+	margin-top: 8px;
+}

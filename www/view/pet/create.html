@@ -5,9 +5,29 @@
 		<button class="button button-clear button-positive">保存</button>
 	</ion-header-bar>
 	<ion-content>
-		<div class="list padding">
-			<label class="item item-input">
-				<input type="text" placeholder="名字">
+		<div class="row">
+			<div class="col">
+				<img id="petAvator" style="max-width: 100%">
+			</div>
+			<div class="col col-75">
+				<label class="item item-input">
+					<input id="createPetName" type="text" placeholder="名字">
+				</label>
+				<label id="createPetBirthday" class="item item-input">
+					<input ng-click="openDatePicker()" type="date" placeholder="出生/领养日期">
+				</label>
+			</div>
+		</div>
+		<div class="list list-inset">
+			<label class="item item-input item-select">
+				<div class="input-label">
+					品种
+				</div>
+				<select>
+					<option selected>陆龟</option>
+					<option>水龟</option>
+					<option>半水龟</option>
+				</select>
 			</label>
 		</div>
 	</ion-content>
