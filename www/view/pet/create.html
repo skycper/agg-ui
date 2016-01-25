@@ -2,19 +2,19 @@
 	<ion-header-bar class="bar-stable">
 		<button class="button button-clear button-positive" ng-click="closeCreatePetModal()">取消</button>
 		<div class="h1 title">添加龟宝宝</div>
-		<button class="button button-clear button-positive">保存</button>
+		<button class="button button-clear button-positive" ng-click="createPet()">保存</button>
 	</ion-header-bar>
 	<ion-content>
 		<div class="row">
 			<div class="col">
-				<img id="petAvator" style="max-width: 100%">
+				<img id="createPetAvatar" style="max-width: 100%">
 			</div>
 			<div class="col col-75">
 				<label class="item item-input">
-					<input id="createPetName" type="text" placeholder="名字">
+					<input id="createPetName" name="createPetName" type="text" placeholder="名字">
 				</label>
-				<label id="createPetBirthday" class="item item-input">
-					<input ng-click="openDatePicker()" type="date" placeholder="出生/领养日期">
+				<label id="createPetBirthdayLabel" class="item item-input">
+					<input id="createPetBirthday" name="createPetBirthday" ng-click="openDatePicker()" type="date" placeholder="出生/领养日期">
 				</label>
 			</div>
 		</div>
@@ -23,10 +23,10 @@
 				<div class="input-label">
 					品种
 				</div>
-				<select>
-					<option selected>陆龟</option>
-					<option>水龟</option>
-					<option>半水龟</option>
+				<select id="createPetCategory" name="createPetCategory">
+					<option value="0" selected>陆龟</option>
+					<option value="1">水龟</option>
+					<option value="2">半水龟</option>
 				</select>
 			</label>
 		</div>

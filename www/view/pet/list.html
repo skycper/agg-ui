@@ -3,6 +3,13 @@
 		<button class="button button-large ion-plus" ng-click="showPicSelectActionSheet()"></button>
     </ion-nav-buttons>
 	<ion-content class="padding">
-		
+		<div id="petList" class="list" ng-repeat="pet in pets">
+			<a class="item item-thumbnail-left" href="#">
+				<img ng-src="data:image/jpeg;base64,{{ pet.avatar }}">
+				<h2 ng-bind="pet.name"></h2>
+				<p ng-bind="pet.birthday"></p>
+				<p ng-bind="pet.categoryName"></p>
+			</a>
+		</div>
 	</ion-content>
 </ion-view>
