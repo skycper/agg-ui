@@ -1,4 +1,8 @@
 /* Empty. Add your own CSS if you like */
+.pane{
+	background: #f3f3f3;
+}
+
 #createPetAvatar{
 	width: 60px;
 	height: 60px;

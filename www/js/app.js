@@ -1,6 +1,6 @@
 var BACKENDURL = 'http://localhost/laravel/agg/public';
 
-deps = ['ionic', 'ngCordova'];
+deps = ['ionic', 'ngCordova', 'satellizer'];
 
 agg = angular.module('agg', deps).filter(  
     'to_trusted', ['$sce', function ($sce) {  
@@ -9,6 +9,46 @@ agg = angular.module('agg', deps).filter(
         }  
     }]
 );
+
+agg.run(function($rootScope, $state) {
+  // $stateChangeStart is fired whenever the state changes. We can use some parameters
+  // such as toState to hook into details about the state as it is changing
+  $rootScope.$on('$stateChangeStart', function(event, toState) {
+
+      // Grab the user from local storage and parse it to an object
+      var user = JSON.parse(localStorage.getItem('user'));            
+
+      // If there is any user data in local storage then the user is quite
+      // likely authenticated. If their token is expired, or if they are
+      // otherwise not actually authenticated, they will be redirected to
+      // the auth state because of the rejected request anyway
+      if(user) {
+
+          // The user's authenticated state gets flipped to
+          // true so we can now show parts of the UI that rely
+          // on the user being logged in
+          $rootScope.authenticated = true;
+
+          $rootScope.token = localStorage.getItem('satellizer_token'); 
+          // Putting the user's data on $rootScope allows
+          // us to access it anywhere across the app. Here
+          // we are grabbing what is in local storage
+          $rootScope.currentUser = user;
+
+          // If the user is logged in and we hit the auth route we don't need
+          // to stay there and can send the user to the main state
+          if(toState.name === "auth") {
+
+              // Preventing the default behavior allows us to use $state.go
+              // to change states
+              event.preventDefault();
+
+              // go to the "main" state which in our case is users
+              $state.go('users');
+          }       
+      }
+  });
+});
 
 agg.factory('Camera', ['$q', function($q){
   return {
@@ -24,10 +64,22 @@ agg.factory('Camera', ['$q', function($q){
       return q.promise;
     }
   }
-}]);
+}]).factory("SessionService", function() {
+  return {
+    get: function(key) {
+      return sessionStorage.getItem(key);
+    },
+    set: function(key, val) {
+      return sessionStorage.setItem(key, val);
+    },
+    unset: function(key) {
+      return sessionStorage.removeItem(key);
+    }
+  }
+});
 
 //set up route
-agg.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $compileProvider) {
+agg.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $compileProvider, $authProvider, $httpProvider, $provide) {
   $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel|blob):|data:image\//);
   $ionicConfigProvider.views.maxCache(5);
   // note that you can also chain configs
@@ -37,23 +89,186 @@ agg.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $c
     //     when('/user', {templateUrl: 'views/user.html'}).
     //     otherwise({redirectTo: '/'});
   $stateProvider
-    .state('pet', {
-      url: '/pet',
-      templateUrl: 'view/pet/index.html'
-  })
-    .state('pet.list', {
+    .state('tabs', {
+    url: "/",
+    abstract: true,
+    templateUrl: "view/tabs.html",
+  }).state('login', {
+    url: '/login',
+    templateUrl: 'view/auth/login.html'
+  }).state('register', {
+    url: '/register',
+    templateUrl: 'view/auth/register.html'
+  }).state('tabs.user', {
+    url: 'user',
+    views: {
+      'user-tab': {
+        templateUrl: 'view/user/index.html',
+        controller: 'UserController as user'
+      }
+    }
+  }).state('tabs.pet', {
+      url: 'pet',
+      abstract: true,
+      views: {
+        'pet-tab': {
+          templateUrl: "view/pet/index.html",
+          controller: 'PetController'
+        }
+      }
+  }).state('tabs.pet.list', {
       url: '/list',
-      templateUrl: 'view/pet/list.html'
+      views: {
+        'pet-index': {
+          templateUrl: "view/pet/list.html",
+        }
+      }
   });
 
-  $urlRouterProvider.otherwise("/pet/list");
+  $urlRouterProvider.otherwise("pet/list");
+
+  function redirectWhenLoggedOut($q, $injector) {
+    return {
+      responseError: function(rejection) {
+        // Need to use $injector.get to bring in $state or else we get
+        // a circular dependency error
+        var $state = $injector.get('$state');
+
+        // Instead of checking for a status code of 400 which might be used
+        // for other reasons in Laravel, we check for the specific rejection
+        // reasons to tell us if we need to redirect to the login state
+        var rejectionReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
+
+        // Loop through each rejection reason and redirect to the login
+        // state if one is encountered
+        angular.forEach(rejectionReasons, function(value, key) {
+
+          if(rejection.data.error === value) {
+            // If we get a rejection corresponding to one of the reasons
+            // in our array, we know we need to authenticate the user so 
+            // we can remove the current user from local storage
+            localStorage.removeItem('user');
+
+            // Send the user to the auth state so they can login
+            $state.go('login');
+          }
+        });
+        return $q.reject(rejection);
+      }
+    }
+  }
+
+  // Setup for the $httpInterceptor
+  $provide.factory('redirectWhenLoggedOut', redirectWhenLoggedOut);
+
+  // Push the new factory onto the $http interceptor array
+  $httpProvider.interceptors.push('redirectWhenLoggedOut');
+
+  $authProvider.loginUrl = BACKENDURL + '/api/auth/authenticate';
+  $authProvider.signupUrl = BACKENDURL + '/api/auth/register';
 });
 
-agg.controller('appController', function($scope, $timeout, $http){
+agg.controller('AppController', function($scope, $timeout, $http){
   
 });
 
-agg.controller('petController', function($scope, $http, $ionicModal, $ionicActionSheet, $timeout, Camera){
+agg.controller('AuthController', function($scope, $http, $auth, $state, $ionicModal, $rootScope){
+  $scope.login = function() {
+      var credentials = {
+          email: $('#loginUserName').val(),
+          password: $('#loginUserPassword').val()
+      };
+      // Use Satellizer's $auth service to login
+      $auth.login(credentials).then(function(data) {
+          // If login is successful, redirect to the user state
+          $rootScope.token = data.data.token;
+          return $http({
+            url: BACKENDURL + '/api/auth/authenticate/user',
+            method: "GET",
+            params: {}
+          }).success(function(data, status) {
+            console.log(data);
+          });
+      }, function(error) {
+          $scope.loginError = true;
+          $scope.loginErrorText = error.data.error;
+      // Because we returned the $http.get request in the $auth.login
+      // promise, we can chain the next promise to the end here
+      }).then(function(response) {
+        // Stringify the returned data to prepare it
+        // to go into local storage
+        var user = JSON.stringify(response.data.user);
+
+        // Set the stringified user data into local storage
+        localStorage.setItem('user', user);
+
+        // The user's authenticated state gets flipped to
+        // true so we can now show parts of the UI that rely
+        // on the user being logged in
+        $rootScope.authenticated = true;
+
+        $rootScope.token = response.data.token;
+
+        // Putting the user's data on $rootScope allows
+        // us to access it anywhere across the app
+        $rootScope.currentUser = response.data.user;
+
+        // Everything worked out so we can now redirect to
+        // the users state to view the data
+        // $state.go('tabs.user');
+        $state.go('tabs.pet.list');
+        $rootScope.$broadcast('userAuthChange');
+      });
+  };
+
+  $scope.logout = function() {
+    $auth.logout().then(function() {
+      console.log("User loged out2");
+      // Remove the authenticated user from local storage
+      localStorage.removeItem('user');
+
+      // Flip authenticated to false so that we no longer
+      // show UI elements dependant on the user being logged in
+      $rootScope.authenticated = false;
+
+      // Remove the current user info from rootscope
+      $rootScope.currentUser = null;
+      $scope.checkAuthorization();
+      $rootScope.$broadcast('userAuthChange');
+    });
+  };
+
+  $scope.checkAuthorization = function(){
+    if($rootScope.authenticated !== true){
+      $state.go('login');
+    }
+  };
+
+  $scope.signup = function(){
+    var credentials = {
+      name: $('#registerUserName').val(),
+      email: $('#registerEmail').val(),
+      password: $('#registerUserPassword').val()
+    };
+
+    $auth.signup(credentials).then(function(response) {
+      // Redirect user here to login page or perhaps some other intermediate page
+      // that requires email address verification before any other part of the site
+      // can be accessed.
+      console.log(response);
+      $state.go('login');
+    }).catch(function(response) {
+      // Handle errors here.
+      console.log(response);
+    });
+  }
+});
+
+agg.controller('UserController', function($scope, $http, $auth, $state, $ionicModal, $rootScope){
+  
+});
+
+agg.controller('PetController', function($rootScope, $scope, $http, $ionicModal, $ionicActionSheet, $state, $timeout, Camera){
   $scope.showPicSelectActionSheet = function() {
     // Show the action sheet
     var hideSheet = $ionicActionSheet.show({
@@ -120,6 +335,7 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
   }).then(function(modal) {
     $scope.createPetModal = modal;
   });
+
   $scope.openCreatePetModal = function() {
     $scope.createPetModal.show();
 
@@ -167,12 +383,10 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
     petData.createPetBirthday = $("#createPetBirthday").val();
     petData.createPetCategory= $("#createPetCategory").val();
 
-    console.log(petData);
-
     $http.post(BACKENDURL + "/api/pet/store", petData,{}).success(function(data, status){
       if(data && status == 200){
-        console.log(data);
-        location.href = '/';
+        $scope.refreshPetList();
+        $scope.closeCreatePetModal();
       }else{
         alert("create unsuccess");
         console.debug(data + " status:" + status);
@@ -186,11 +400,13 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
     $http({
         url: BACKENDURL + "/api/pet/all",
         method: "GET",
-        params: {}
+        params: {
+        }
     }).success(function(data, status) {
       $scope.pets = data;
       for(var pet = 0; pet < $scope.pets.length; pet++){
-        $scope.pets[pet].avatarURI = "data:image/jpeg;base64," + $scope.pets[pet].avatar;
+        // $scope.pets[pet].decodedAvatar = base64decode($scope.pets[pet].avatar);
+        // console.log($scope.pets[pet].decodedAvatar);
         switch($scope.pets[pet].category){
           case "0":
             $scope.pets[pet].categoryName = '陆龟';
@@ -204,12 +420,25 @@ agg.controller('petController', function($scope, $http, $ionicModal, $ionicActio
           default:
             break;
         }
+        $scope.$broadcast('scroll.refreshComplete');
       }
     }).error(function(data, status) {
       console.debug(status);
-      location.href = '/';
+      $scope.$broadcast('scroll.refreshComplete');
     });
   };
 
-  $scope.getAllPets();
+  if($rootScope.authenticated === true){
+      $scope.getAllPets();
+  }else{
+    $scope.checkAuthorization();
+  }
+
+  $rootScope.$on('userAuthChange',function (){
+    $scope.refreshPetList();
+  });
+
+  $scope.refreshPetList = function() {
+    $scope.getAllPets();
+  };
 });

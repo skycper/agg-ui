@@ -1,0 +1,31 @@
+<ion-view>
+	<ion-header-bar class="bar-stable">
+<!-- 		<button class="button button-clear button-positive" ng-click="closeLoginModal()">取消</button> -->
+		<div class="h1 title">注册爱龟龟</div>
+		<a class="button button-clear button-positive" href="#/login">登录</a>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list">
+			<label class="item item-input">
+				<span class="input-label">用户名</span>
+				<input type="text" ng-model="registerUserName" id="registerUserName" />
+			</label>
+			<label class="item item-input">
+				<span class="input-label">邮箱</span>
+				<input type="text" ng-model="registerEmail" id="registerEmail" />
+			</label>
+			<label class="item item-input">
+				<span class="input-label">密码</span>
+				<input type="password" ng-model="registerUserPassword" id="registerUserPassword" />
+			</label>
+			<label class="item item-input">
+				<span class="input-label">确认密码</span>
+				<input type="password" ng-model="registerUserRePassword" id="registerUserRePassword" />
+			</label>
+		</div>
+
+		<button class="button button-block button-positive" ng-click="signup()">
+			注册
+		</button>
+	</ion-content>
+</ion-view>
