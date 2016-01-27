@@ -1,5 +1,3 @@
-var BACKENDURL = 'http://localhost/laravel/agg/public';
-
 deps = ['ionic', 'ngCordova', 'satellizer'];
 
 agg = angular.module('agg', deps).filter(  
@@ -260,6 +258,7 @@ agg.controller('AuthController', function($scope, $http, $auth, $state, $ionicMo
 
         // Remove the current user info from rootscope
         $rootScope.currentUser = null;
+        $state.go('tabs.user.main');
         $scope.checkAuthorization();
         $rootScope.$broadcast('userAuthChange');
       });
