@@ -8,19 +8,19 @@
 		<div class="list">
 			<label class="item item-input">
 				<span class="input-label">用户名</span>
-				<input type="text" ng-model="registerUserName" id="registerUserName" />
+				<input type="text" ng-model="registerUserName" id="registerUserName" required />
 			</label>
 			<label class="item item-input">
 				<span class="input-label">邮箱</span>
-				<input type="text" ng-model="registerEmail" id="registerEmail" />
+				<input type="email" ng-model="registerEmail" id="registerEmail" required />
 			</label>
 			<label class="item item-input">
 				<span class="input-label">密码</span>
-				<input type="password" ng-model="registerUserPassword" id="registerUserPassword" />
+				<input type="password" ng-model="registerUserPassword" id="registerUserPassword" required />
 			</label>
 			<label class="item item-input">
 				<span class="input-label">确认密码</span>
-				<input type="password" ng-model="registerUserRePassword" id="registerUserRePassword" />
+				<input type="password" ng-model="registerUserRePassword" id="registerUserRePassword" required />
 			</label>
 		</div>
 

@@ -8,11 +8,12 @@
 			on-refresh="refreshPetList()">
 		</ion-refresher>
 		<div id="petList" class="list" ng-repeat="pet in pets">
-			<a class="item item-thumbnail-left" href="#">
+			<a class="item item-avatar" href="#">
 				<img ng-src="data:image/jpeg;base64,{{ pet.avatar }}">
 				<h2 ng-bind="pet.name"></h2>
-				<p ng-bind="pet.birthday"></p>
-				<p ng-bind="pet.categoryName"></p>
+				<p>
+					品种：</i><span ng-bind="pet.categoryName"></span>
+				</p>
 			</a>
 		</div>
 	</ion-content>

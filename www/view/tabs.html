@@ -3,17 +3,17 @@
   </ion-nav-back-button>
 </ion-nav-bar>
 
-<ion-tabs class="tabs-icon-top tabs-positive">
+<ion-tabs id="tabs" class="tabs-icon-top tabs-positive">
 
-  <ion-tab title="Home" icon="ion-home" ui-sref="tabs.pet.list">
+  <ion-tab title="龟宝宝" icon="ion-home" ui-sref="tabs.pet.list">
     <ion-nav-view name="pet-tab"></ion-nav-view>
   </ion-tab>
 
-  <ion-tab title="About" icon="ion-ios-information" href="#/tab/about">
+  <ion-tab title="龟龟小报" icon="ion-ios-bookmarks" ui-sref="tabs.user.detail">
     <ion-nav-view name="article-tab"></ion-nav-view>
   </ion-tab>
 
-  <ion-tab title="我的" icon="ion-ios-world" ui-sref="tabs.user">
+  <ion-tab title="我的" icon="ion-ios-world" ui-sref="tabs.user.main">
     <ion-nav-view name="user-tab"></ion-nav-view>
   </ion-tab>
 
