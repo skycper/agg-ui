@@ -1,0 +1,9 @@
+<ion-view view-title="所在地区">
+	<ion-content>
+		<ion-list>
+			<a class="item" href ng-click="selArea(item.areaid)" ng-repeat="item in areas">
+				<span ng-bind="item.area"></span>
+			</a>
+		</ion-list>
+	</ion-content>
+</ion-view>

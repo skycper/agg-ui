@@ -1,0 +1,10 @@
+<ion-view view-title="所在省份">
+	<ion-content>
+		<ion-list>
+			<a class="item item-icon-right" href ng-click="selProvince(item.provinceid)" ng-repeat="item in provinces">
+				<span ng-bind="item.province"></span>
+				<i class="icon ion-ios-arrow-right"></i>
+			</a>
+		</ion-list>
+	</ion-content>
+</ion-view>

@@ -12,3 +12,11 @@
 #createPetBirthdayLabel{
 	margin-top: 8px;
 }
+
+.userDetailRightContent{
+	margin-right: 45px;
+}
+
+#logoutButton{
+	margin-top: 28px;
+}

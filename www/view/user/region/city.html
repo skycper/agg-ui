@@ -1,0 +1,10 @@
+<ion-view view-title="所在城市">
+	<ion-content>
+		<ion-list>
+			<a class="item item-icon-right" href ng-click="selCity(item.cityid)" ng-repeat="item in cities">
+				<span ng-bind="item.city"></span>
+				<i class="icon ion-ios-arrow-right"></i>
+			</a>
+		</ion-list>
+	</ion-content>
+</ion-view>

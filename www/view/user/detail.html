@@ -1,6 +1,35 @@
 <ion-view view-title="用户信息">
 	<ion-content>
 		<div class="list">
+			<a class="item item-thumbnail-right item-icon-right" href="#">
+				头像
+				<img id="userDetailAvatar" class="userDetailRightContent" ng-src="data:image/jpeg;base64,{{ user.avatar }}">
+				<i class="icon ion-ios-arrow-right"></i>
+		    </a>
+		    <a class="item" href="#">
+				用户名
+				<span class="item-note" ng-bind="user.name"></span>
+			</a>
+			<a class="item" href="#">
+				邮箱
+				<span class="item-note" ng-bind="user.email"></span>
+			</a>
+			<div class="item item-divider"></div>
+			<a class="item item-icon-right" href="#/user/gender">
+				性别
+				<span class="item-note" ng-bind="user.gender"></span>
+				<i class="icon ion-ios-arrow-right"></i>
+			</a>
+			<a class="item item-icon-right" href="#">
+				出生日期
+				<span class="item-note" ng-bind="user.birthday"></span>
+				<i class="icon ion-ios-arrow-right"></i>
+			</a>
+			<a class="item item-icon-right" href="#/user/province">
+				所在地
+				<span class="item-note" ng-bind="user.region"></span>
+				<i class="icon ion-ios-arrow-right"></i>
+			</a>
 			<button id="logoutButton" class="button button-full button-assertive" ng-click="logout()">注销</button>
 		</div>
 	</ion-content>
