@@ -5,17 +5,19 @@
 		<button class="button button-clear button-positive" ng-click="createPet()">保存</button>
 	</ion-header-bar>
 	<ion-content>
-		<div class="row">
+		<div id="petCreateDataRow1" class="row">
 			<div class="col">
 				<img id="createPetAvatar" style="max-width: 100%">
 			</div>
 			<div class="col col-75">
-				<label class="item item-input">
-					<input id="createPetName" name="createPetName" type="text" placeholder="名字">
+				<label class="item item-input item-stacked-label">
+					<span class="input-label">名字</span>
+					<input id="createPetName" name="createPetName" type="text">
 				</label>
-				<label id="createPetBirthdayLabel" class="item item-input">
-					<input id="createPetBirthday" name="createPetBirthday" ng-click="openDatePicker()" type="date" placeholder="出生/领养日期">
-				</label>
+				<ionic-datepicker input-obj="petBirthdayDatePicker" class="item item-input item-stacked-label datePickerInputSytle">
+					<span class="input-label">出生/领养日期</span>
+					<button class="button button-block button-light"> {{petBirthdayDatePicker.inputDate | date:petBirthdayDatePicker.dateFormat}}</button>
+				</ionic-datepicker>
 			</div>
 		</div>
 		<div class="list list-inset">

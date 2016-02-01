@@ -20,11 +20,11 @@
 				<span class="item-note" ng-bind="user.gender"></span>
 				<i class="icon ion-ios-arrow-right"></i>
 			</a>
-			<a class="item item-icon-right" href="#">
-				出生日期
-				<span class="item-note" ng-bind="user.birthday"></span>
+			<ionic-datepicker input-obj="userBirthdayDatePicker" class="item item-icon-right datePickerLinkIconRightSytle">
+				<span class="input-label">出生日期</span>
+				<button class="button button-block button-light"> {{user.birthday | date:userBirthdayDatePicker.dateFormat}}</button>
 				<i class="icon ion-ios-arrow-right"></i>
-			</a>
+			</ionic-datepicker>
 			<a class="item item-icon-right" href="#/user/province">
 				所在地
 				<span class="item-note" ng-bind="user.region"></span>
