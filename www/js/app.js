@@ -636,7 +636,9 @@ agg.controller('PetController', function($rootScope, $scope, $http, $ionicModal,
     var petData = {};
     petData.petName = $("#createPetName").val();
     petData.avatarData = $scope.avatarData;
-    petData.createPetBirthday = $scope.datepickerObject.inputDate;
+    if($scope.petBirthdayDatePicker.inputDate){
+      petData.createPetBirthday = $scope.petBirthdayDatePicker.inputDate;
+    }
     petData.createPetCategory= $("#createPetCategory").val();
 
     $http.post(BACKENDURL + "/api/pet/store", petData,{}).success(function(data, status){
